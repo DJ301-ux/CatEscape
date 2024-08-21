@@ -1,50 +1,73 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-//한글
 
 public class ArrowController : MonoBehaviour
 {
-    public float moveSpeed = -0.01f;
-    public float gizmos = 1f;
+    public float moveSpeed = 0.001f;
+    private int dir = -1;
     public float radius = 1f;
-    public Transform playerTrans;
+    private Transform playerTrans;
+    private float damage;
 
     private void Start()
     {
-        //길이
-        float distanceY = playerTrans.position.y - this.transform.position.y;
+        this.playerTrans = GameObject.Find("player").transform;
+        this.damage = 10;
 
-        //this.radius;
+        Debug.Log($"화살의 공격력 : {this.damage}");
 
-        PlayerController playerController = this.playerTrans.gameObject.GetComponent<PlayerController>();
+        //길이 
+        //Vector3 c = playerTrans.position - this.transform.position;
+        //float d1 = c.magnitude;
 
-        //if(distanceY <= sumRadius)
+        //float d2 = Mathf.Abs(playerTrans.position.y - this.transform.position.y);
     }
 
     void Update()
     {
-        this.transform.Translate(0, moveSpeed, 0);
+        this.transform.Translate(0, dir * moveSpeed, 0);
 
-        bool = isCollieded = this.CheckCollsion;
+        bool isCollided = this.CheckCollsion();
 
-        if (this.transform.position.y <= -6f)
+        if (isCollided)
         {
-            Destroy(this.gameObject);
+            Object.Destroy(this.gameObject);
         }
 
-        
-
-            
+        if (this.transform.position.y <= -6.36f)
+        {
+            Object.Destroy(this.gameObject);
+        }
     }
+
     private void OnDrawGizmos()
     {
-        GizmosExtensions.DrawWireArc(this.transform.position, 360, gizmos);
+        GizmosExtensions.DrawWireArc(this.transform.position, 360, radius);
     }
-    //충돌 체크를 한 후에 충돌이 되었다면 bool타입을 true를 반환
+
+    //충돌체크를 한후에 충돌이 되었다면 true를 반환 
     private bool CheckCollsion()
     {
+        float distance = Vector3.Distance(playerTrans.position, this.transform.position);
 
+        PlayerController playerController = this.playerTrans.gameObject.GetComponent<PlayerController>();
+
+        float sumRadius = this.radius + playerController.radius;
+        //Debug.Log($"{distance}, {sumRadius}");
+
+        if (distance <= sumRadius)
+        {
+            //Debug.Log("충돌했습니다.");
+
+            //플레이어의 체력을 감소 시킨다 
+            playerController.HitDamage(this.damage);
+            return true;
+        }
+        else
+        {
+            //Debug.Log("충돌안했습니다.");
+            return false;
+        }
     }
 }
